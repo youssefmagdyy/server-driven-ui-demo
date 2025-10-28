@@ -6,68 +6,87 @@ It demonstrates, on a small scale, how a backend can **generate dynamic pages en
 
 ---
 
-## 🧭 Concept
+## Core Concept
 
-> **Define → Extract & Transform → Present**
+**Define → Extract & Transform → Present**
 
-| PPP Component | Implemented In This Demo |
-|----------------|--------------------------|
-| **Attribute Data Store (ADS)** | In-memory / H2 database for configurable attributes |
-| **Query Engine** | Simple service combining attributes into datasets |
-| **Page Framework** | Frontend that renders pages from backend JSON descriptors |
-| **Configuration Tooling** | REST endpoints to define new attributes or pages without redeploys |
-
----
-
-## ⚙️ Tech Stack
-
-- **Backend:** Java 21, Spring Boot, Spring Web, Spring Data JPA, H2  
-- **Frontend:** Vanilla JavaScript (static page in `/static/index.html`)  
-- **Build Tool:** Maven  
-- **Run:** `./mvnw spring-boot:run`
+| PPP Component | Implemented As |
+|----------------|----------------|
+| **Attribute Data Store (ADS)** | H2 / in-memory database storing dynamic attributes (text, queries, etc.) |
+| **Query Engine** | Simple service executing SQL queries |
+| **Page Compiler** | Transforms raw page configurations into compiled page definitions at startup |
+| **Page Renderer** | Hydrates pages with attribute values and query results at request time |
+| **Frontend** | A generic React app that interprets backend JSON responses and renders them |
 
 ---
 
-## 🚀 How It Works
+## Tech Stack
 
-1. The **Spring Boot backend** exposes an API (`/api/pages/{id}`) that returns a JSON *page descriptor*.  
-2. Each descriptor defines a list of **components** (`text`, `image`, `button`, etc.) and their properties.  
-3. The **frontend** fetches this JSON and renders it dynamically — no hard-coded UI or layouts.  
-4. New **pages or attributes** can be added at runtime via REST endpoints, with zero frontend changes.
+- **Backend:** Java 21, Spring, H2  
+- **Frontend:** React  
+- **Build Tool:** Maven
+  
+---
+
+## How It Works
+
+Raw page configs are defined in Java (for now).  
+At startup, they are **compiled** into structured `PageDefinition` objects.
+
+**Flow:**
+- Raw Page → compiled once into a PageDefinition  
+- PageDefinition → hydrated with live data from ADS + QueryEngine into a Page 
+- Frontend → fetches Page JSON and renders it dynamically  
 
 ---
 
-## 🧩 Example
 
-```json
-{
-  "id": "1",
-  "title": "Welcome to PPP Demo!",
-  "components": [
-    { "type": "text", "props": { "text": "This page is defined by the backend!" } },
-    { "type": "image", "props": { "url": "https://picsum.photos/300" } },
-    { "type": "button", "props": { "text": "Click me!", "action": "/api/hello" } }
-  ]
-}
-```
+## Example Flow
 
-The frontend interprets this configuration and renders it as:
+1. Raw Page defined in Java:
+    ```java
+    new RawPage("home", List.of(
+        new RawComponent("Header", Map.of("title", "Welcome!")),
+        new RawComponent("Banner", Map.of("attr", "bannerTextAttr")),
+        new RawComponent("Grid", Map.of("query", "featuredProductsSQL"))
+    ));
+    ```
+2. Attributes in DB:
+    | Name | Type | Value |
+    |------|------|-------|
+    | featuredProductsSQL | SQL | `SELECT * FROM products WHERE featured = true` |
+    | bannerTextAttr | STRING | Featured Products Today |
 
-[Text Component] [Image Component] [Button Component]
 
-Adding a new page requires zero frontend code changes — only a new JSON definition or backend configuration.
+4. Renderer compiles → hydrates → returns JSON:
+    ```json
+    {
+      "name": "home",
+      "components": [
+        { "type": "Header", "props": { "title": "Welcome!" } },
+        { "type": "Banner", "props": { "text": "Featured Products Today" } },
+        { "type": "Grid", "props": { "data": [ { "name": "Milk" } ] } }
+      ]
+    }
+    ```
 
-## 🧰 Running the Demo
+5. The frontend interprets this configuration and renders it as
+   [Header Component] [Banner Component] [Grid Component]
+
+---
+
+## Running the Demo
 
 ```bash
 # clone
-git clone https://github.com/<your-username>/mini-picnic-ppp.git
-cd mini-picnic-ppp
+git clone https://github.com/youssefmagdyy/server-driven-ui-demo.git
+cd server-driven-ui-demo
 
-# run
+# run server
 ./mvnw spring-boot:run
-```
 
-> 📝 **Note:** You only need Java 17+ installed.  
-> The Maven wrapper (`mvnw`) included in the project will automatically download and use the correct Maven version.
+# run client
+cd client
+npm start
+```
 
