@@ -1,5 +1,6 @@
 package com.youssef.server_ui_demo.Page;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -10,6 +11,7 @@ import java.util.Map;
 @Service
 public class PageCompiler {
 
+    @Cacheable("pageDefs")
     public PageDefinition compileRawPage(RawPage rawPage)
     {
         List<ComponentDefinition> compiledComponents = rawPage.rawComponents().stream().map(this::compileRawComponent).toList();
@@ -23,13 +25,15 @@ public class PageCompiler {
 
             if (entry.getKey().equals("attr")) {
                 dynamicProps.put(entry.getKey(), (String) entry.getValue());
-            } else if (entry.getKey().equals("query")) {
-                dynamicProps.put(entry.getKey(), (String) entry.getValue());
             } else {
                 staticProps.put(entry.getKey(), entry.getValue());
             }
         }
-        return new ComponentDefinition(rawComp.name(), staticProps, dynamicProps);
+
+        List<ComponentDefinition> childrenCompDefs= rawComp.children().stream().map(this::compileRawComponent).toList();
+
+
+        return new ComponentDefinition(rawComp.name(), staticProps, dynamicProps,childrenCompDefs);
 
     }
 }

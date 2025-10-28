@@ -1,5 +1,7 @@
+import "../styles/Banner.css";
+
 const Banner = ({ text }) => (
-  <div style={{ background: "#eee", padding: "1rem", textAlign: "center" }}>
+  <div className="banner">
     <h2>{text}</h2>
   </div>
 );
