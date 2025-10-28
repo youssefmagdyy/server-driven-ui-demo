@@ -1,26 +1,25 @@
+import "../styles/Grid.css";
 
 const Grid = ({ data }) => (
-  <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap", padding: "1rem", justifyContent: "center" }}>
-    {data.map((product) => (
-      <div
-        key={product.ID}
-        style={{
-          border: "1px solid #ccc",
-          padding: "1rem",
-          width: "200px",
-          textAlign: "center",
-        }}
-      >
-        {product.IMAGE_URL ? (
-          <img src={product.IMAGE_URL} alt={product.NAME} width="100%" />
-        ) : (
-          <div style={{ height: "100px", background: "#f0f0f0" }}>No Image</div>
-        )}
-        <h3>{product.NAME}</h3>
-        <p>{product.PRODUCER}</p>
-      </div>
-    ))}
-  </div>
+  <section className="product-grid">
+    <div className="grid">
+      {data.map((p) => (
+        <div key={p.ID} className="card">
+          <div className="image-wrapper">
+            {p.IMAGE_URL ? (
+              <img src={p.IMAGE_URL} alt={p.NAME} />
+            ) : (
+              <div className="no-image">No Image</div>
+            )}
+          </div>
+          <div className="info">
+            <h3>{p.NAME}</h3>
+            <p>{p.PRODUCER}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+  </section>
 );
 
 export default Grid;

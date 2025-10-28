@@ -1,7 +1,11 @@
+import "../styles/Header.css";
+
 const Header = ({ title, subtitle }) => (
-  <header style={{ textAlign: "center", margin: "2rem 0" }}>
-    <h1>{title}</h1>
-    <p>{subtitle}</p>
+  <header className="header">
+    <div className="header-content">
+      <h1>{title}</h1>
+      <p>{subtitle}</p>
+    </div>
   </header>
 );
 
